@@ -2,47 +2,65 @@
 
 #include "leds.h"
 #include "modes.h"
+#include "config.h"
+#include "controls.h"
+
+static uint8_t mode = 0;
+
+void reset() {
+  led_setup();
+  led_off();
+  controls_setup();
+  mode = 0;
+  modes::split_loop::setup(5);
+}
 
 void setup() {
   Serial.begin(9600);
   Serial.println("setup");
 
-  led_setup();
-  // modes::strobopop::setup(true);
-  modes::split_loop::setup(5);
-  // modes::ice::setup();
-}
-
-inline uint16_t shift_right_round(uint16_t val, uint8_t shift) {
-  uint16_t ret = val >> shift;
-  if (val & (1 << (shift - 1))) {
-    // Round up
-    ret++;
-  }
-  return ret;
+  reset();
 }
 
 void loop() {
-  speed = shift_right_round(analogRead(A0), 2);
-  brightness = 25 + shift_right_round(analogRead(A1), 4);
-  brightness = min(brightness, MAX_BRIGHTNESS);
-  // a0_sum += analogRead(A0);
-  // a1_sum += analogRead(A1);
-  // if (iter % 1 == 0) {
-  //   speed = a0_sum >> 6;
-  //   brightness = 25 + (a1_sum >> 8);
-  //   brightness = min(brightness, MAX_BRIGHTNESS);
-  //   a0_sum = 0;
-  //   a1_sum = 0;
-  //   Serial.print("s: ");
-  //   Serial.print(speed);
-  //   Serial.print(", b: ");
-  //   Serial.println(brightness);
-  // }
+  controls_step();
+  if (!on) {
+    reset();
+    return;
+  }
 
-  // modes::strobopop::step();
-  modes::split_loop::step();
-  // modes::ice::step();
+  if (btn_interrupt) {
+    if (digitalRead(BUTTON_PIN) == LOW) {
+      mode = (mode + 1) % 4;
+      switch (mode) {
+      case 0:
+        modes::split_loop::setup(5);
+        break;
+      case 1:
+        modes::ice::setup();
+      case 2:
+        modes::strobopop::setup(false);
+      case 3:
+        modes::strobopop::setup(true);
+      default:
+        break;
+      }
+    }
+    btn_interrupt = 0;
+  }
+
+  switch (mode) {
+  case 0:
+    modes::split_loop::step();
+    break;
+  case 1:
+    modes::ice::step();
+  case 2:
+  case 3:
+    modes::strobopop::step();
+  default:
+    break;
+  }
   delay(2);
   // delay(30);
 }

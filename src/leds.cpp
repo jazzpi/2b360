@@ -1,5 +1,7 @@
 #include "leds.h"
 
+#include "config.h"
+
 CRGB leds[NUM_LEDS];
 uint8_t brightness;
 uint8_t speed;
@@ -10,6 +12,10 @@ void led_setup() {
 
   brightness = 0;
   speed = 0;
+}
+
+void led_off() {
+  FastLED.clear(true);
 }
 
 void setAllLED(uint8_t hue, uint8_t sat, uint8_t val) {
