@@ -2,6 +2,61 @@
 #include "leds.h"
 
 namespace modes {
+
+Mode current_mode;
+
+Mode operator++(Mode& mode, int) {
+  Mode tmp = mode;
+  mode = static_cast<Mode>(
+    (static_cast<int>(mode) + 1) % static_cast<int>(Mode::Last)
+  );
+  return tmp;
+}
+
+void setup_current() {
+  switch (current_mode) {
+  case Mode::SPLIT_LOOP_5:
+    split_loop::setup(5);
+    break;
+  case Mode::ICE:
+    ice::setup();
+    break;
+  case Mode::STROBOPOP_WHITE:
+    strobopop::setup(false);
+    break;
+  case Mode::STROBOPOP_COL:
+    strobopop::setup(true);
+    break;
+  default:
+      break;
+  }
+}
+
+void setup() {
+  current_mode = Mode::First;
+  setup_current();
+}
+
+void cycle_mode() {
+  current_mode++;
+  setup_current();
+}
+
+void step_current() {
+  switch (current_mode) {
+  case Mode::SPLIT_LOOP_5:
+    modes::split_loop::step();
+    break;
+  case Mode::ICE:
+    modes::ice::step();
+  case Mode::STROBOPOP_WHITE:
+  case Mode::STROBOPOP_COL:
+    modes::strobopop::step();
+  default:
+    break;
+  }
+}
+
 namespace split_loop {
 
 static uint8_t splits;
@@ -45,7 +100,6 @@ void setup(bool color_) {
 }
 
 void step() {
-    static uint8_t iter = 0;
     if (on) {
         if (progress == ON_TIME) {
             progress = 0;

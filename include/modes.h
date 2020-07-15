@@ -3,11 +3,16 @@
 namespace modes {
 
 enum class Mode {
-    SPLIT_LOOP_5, SPLIT_LOOP_6, STROBOPOP_WHITE, STROBOPOP_COL,
-    COMET, ICE
+    SPLIT_LOOP_5, ICE, STROBOPOP_WHITE, STROBOPOP_COL,
+    First = SPLIT_LOOP_5,
+    Last = STROBOPOP_COL
 };
 
 extern Mode current_mode;
+
+void setup();
+void cycle_mode();
+void step_current();
 
 namespace split_loop {
 void setup(uint8_t splits);
@@ -30,7 +35,5 @@ constexpr int16_t MAX_HUE = 170;
 void setup();
 void step();
 } // namespace ice
-
-
 
 } // namespace modes
