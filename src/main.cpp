@@ -19,6 +19,8 @@ void setup() {
   reset();
 }
 
+static unsigned counter = 0;
+
 void loop() {
   controls_step();
   if (!on) {
@@ -33,7 +35,10 @@ void loop() {
     btn_interrupt = 0;
   }
 
-  modes::step_current();
-  delay(2);
+  if (counter++ % ((64 - speed) * 4 + 1) == 0) {
+    modes::step_current();
+  }
+
+  // delay(1);
   // delay(30);
 }

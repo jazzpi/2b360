@@ -8,7 +8,7 @@ Mode current_mode;
 Mode operator++(Mode& mode, int) {
   Mode tmp = mode;
   mode = static_cast<Mode>(
-    (static_cast<int>(mode) + 1) % static_cast<int>(Mode::Last)
+    (static_cast<int>(mode) + 1) % (static_cast<int>(Mode::Last) + 1)
   );
   return tmp;
 }
@@ -49,9 +49,11 @@ void step_current() {
     break;
   case Mode::ICE:
     modes::ice::step();
+    break;
   case Mode::STROBOPOP_WHITE:
   case Mode::STROBOPOP_COL:
     modes::strobopop::step();
+    break;
   default:
     break;
   }
@@ -79,7 +81,7 @@ void step() {
     }
   }
   FastLED.show();
-  rot = (rot + speed) % (NUM_LEDS << SPEED_SHIFT);
+  rot = (rot + 6 * ((speed >> 5) + 1)) % (NUM_LEDS << SPEED_SHIFT);
 }
 
 } // namespace split_loop
@@ -96,15 +98,15 @@ void setup(bool color_) {
     on = false;
     color = color_;
     hue = 0;
-    progress = 0;
+    progress = DELAY - 2;
 }
 
 void step() {
     if (on) {
         if (progress == ON_TIME) {
-            progress = 0;
-            on = false;
-            setAllLED(hue, 0, 0);
+          progress = 0;
+          on = false;
+          setAllLED(hue, 0, 0);
         } else {
             progress++;
         }
@@ -118,7 +120,7 @@ void step() {
                 hue += millis();
             }
         } else {
-            progress += speed;
+            progress++;
         }
     }
     FastLED.show();

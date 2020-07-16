@@ -22,7 +22,7 @@ void step();
 namespace strobopop
 {
 constexpr uint16_t ON_TIME = 1;
-constexpr uint16_t DELAY = 256;
+constexpr uint16_t DELAY = 32;
 
 void setup(bool color);
 void step();
